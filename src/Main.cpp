@@ -21,6 +21,7 @@ float blendvalue = 0.2f;
 float rotation = 0.0f;
 
 void processInput(float deltaTime);
+unsigned int loadTexture(const char* path);
 
 gle::Camera mainCamera(600, 600);
 
@@ -141,55 +142,12 @@ int main()
 
 	// texture 1
 	// ----------------
-	unsigned int texture1, texture2;
-	int width, height, nrChannels;
-	unsigned char* data;
-	glGenTextures(1, &texture1);
-	glBindTexture(GL_TEXTURE_2D, texture1);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// load image, create texture and generate mipmaps
-	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("res/imgs/container.jpg", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-	// texture 2
-	// ----------------
-	glGenTextures(1, &texture2);
-	glBindTexture(GL_TEXTURE_2D, texture2);
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// load image, create texture and generate mipmaps
-
-	// stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("res/imgs/awesomeface.png", &width, &height, &nrChannels, STBI_rgb_alpha);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
+	unsigned int texture1, texture2, diffuseMap, specularMap, emissionMap;
+	texture1 = loadTexture("res/imgs/container2.png");
+	texture2 = loadTexture("res/imgs/awesomeface.png");
+	diffuseMap = loadTexture("res/imgs/container2.png");
+	specularMap = loadTexture("res/imgs/container2_specular.png");
+	emissionMap = loadTexture("res/imgs/emission.jpg");
 
 	// light
 	glm::vec3 lampPosition(1.2f, 1.0f, 2.0f);
@@ -201,13 +159,13 @@ int main()
 	ourShader.setInt("texture1", 0);
 	ourShader.setInt("texture2", 1);
 
-	ourShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-	ourShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
-	ourShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+	ourShader.setInt("material.diffuse", 2);
+	ourShader.setInt("material.specular", 3);
+	ourShader.setInt("material.emission", 4);
 	ourShader.setFloat("material.shininess", 32.0f);
 
-	//ourShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-	//ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darken the light a bit to fit the scene
+	ourShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+	ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
 	ourShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 	ourShader.setVec3("light.position", lampPosition);
 
@@ -248,7 +206,6 @@ int main()
 
 		// input
 		// -----
-
 		processInput((float)deltaTime);
 
 		gle::Event ev;
@@ -278,6 +235,13 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, texture1);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, emissionMap);
+
 
 		ourShader.setMat4("view", view);
 		ourShader.setMat4("projection", projection);
@@ -288,6 +252,7 @@ int main()
 
 		//lampPosition = mainCamera.Position;
 		//ourShader.setVec3("light.position", lampPosition);
+		ourShader.setFloat("time", currentTime);
 
 		for (int i = 0; i < 10; i++)
 		{
@@ -306,16 +271,6 @@ int main()
 			glBindVertexArray(VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		// animate lighting
-		lightColor.x = (float)sin(glfwGetTime() * 0.2);
-		lightColor.y = (float)sin(glfwGetTime() * 0.7);
-		lightColor.z = (float)sin(glfwGetTime() * 1.3);
-
-		glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
-		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
-
-		ourShader.setVec3("light.ambient", ambientColor);
-		ourShader.setVec3("light.diffuse", diffuseColor);
 
 		// redner light obj
 		glm::mat4 model(1.0f);
@@ -327,10 +282,6 @@ int main()
 		lightShader.setMat4("projection", projection);
 		lightShader.setMat4("model", model);
 
-		//glBindVertexArray(lightVAO);
-		//ourShader.use();
-		//ourShader.setVec3("objectColor", lightColor);
-		//ourShader.setMat4("model", model);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		time2 = glfwGetTime();
@@ -391,3 +342,37 @@ void processInput(float deltaTime)
 	}
 }
 
+unsigned int loadTexture(const char* path)
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
+
+	if (data)
+	{
+		GLenum format = nrChannels == 1 ? GL_RED : 
+			nrChannels == 3 ? GL_RGB : 
+			nrChannels == 4 ? GL_RGBA : 0;
+		
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		// set the texture wrapping parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		// set texture filtering parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture at path: " << path << std::endl;
+	}
+	stbi_image_free(data);
+
+	return textureID;
+}
