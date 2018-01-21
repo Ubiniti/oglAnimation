@@ -22,8 +22,11 @@ float rotation = 0.0f;
 
 void processInput(float deltaTime);
 unsigned int loadTexture(const char* path);
+bool switchDisplayWireframe();
 
 gle::Camera mainCamera(600, 600);
+
+bool lightFollowCamera = true;
 
 std::ostream& operator<<(std::ostream& stream, glm::vec2& vec)
 {
@@ -150,7 +153,8 @@ int main()
 	emissionMap = loadTexture("res/imgs/emission.jpg");
 
 	// light
-	glm::vec3 lampPosition(1.2f, 1.0f, 2.0f);
+	//glm::vec3 lampPosition(1.2f, 1.0f, 2.0f);
+	glm::vec3 lampPosition = mainCamera.Position;
 	glm::vec3 lampColor(1.0f, 1.0f, 1.0f); //glm::vec3 lightColor(0.3f, 0.5f, 1.0f);
 
 	glm::vec3 lightColor;
@@ -165,9 +169,17 @@ int main()
 	ourShader.setFloat("material.shininess", 32.0f);
 
 	ourShader.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-	ourShader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
+	ourShader.setVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
 	ourShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
 	ourShader.setVec3("light.position", lampPosition);
+	ourShader.setVec3("light.direction", mainCamera.Front);
+	ourShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+	ourShader.setFloat("light.outerCutOff", glm::cos(glm::radians(15.0f)));
+
+	ourShader.setFloat("light.constant", 1.0f);
+	ourShader.setFloat("light.linear", 0.09f);
+	ourShader.setFloat("light.quadratic", 0.032f);
 
 	lightShader.use();
 	lightShader.setVec3("lightColor", lampColor);
@@ -197,13 +209,6 @@ int main()
 		}
 		lastTime = currentTime;
 
-		glm::mat4 view(1.0f),
-			projection(1.0f);
-
-		//model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-		view = mainCamera.getViewMatrix();
-		projection = mainCamera.getProjectionMatrix();
-
 		// input
 		// -----
 		processInput((float)deltaTime);
@@ -211,6 +216,10 @@ int main()
 		gle::Event ev;
 		while (window.pollEvents(ev))
 		{
+			if (ev.type == gle::Event::KeyReleased && ev.key.code == gle::Keyboard::H)
+				lightFollowCamera = !lightFollowCamera;
+			if (ev.type == gle::Event::KeyReleased && ev.key.code == gle::Keyboard::F)
+				switchDisplayWireframe();
 			if (ev.type == gle::Event::MouseButtonPressed && ev.mouseButton.button == gle::Mouse::Left)
 				std::cout << "LMB pressed!" << std::endl;
 			if (ev.type == gle::Event::MouseMoved)
@@ -226,6 +235,14 @@ int main()
 		// render
 		// ------
 		time1 = glfwGetTime();
+
+		glm::mat4 view(1.0f),
+			projection(1.0f);
+
+		//model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+		view = mainCamera.getViewMatrix();
+		projection = mainCamera.getProjectionMatrix();
+
 		window.clear(gle::Color::CYAN);
 
 		ourShader.use();
@@ -250,8 +267,19 @@ int main()
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		//lampPosition = mainCamera.Position;
-		//ourShader.setVec3("light.position", lampPosition);
+		if (lightFollowCamera)
+		{
+			lampPosition = mainCamera.Position;
+			ourShader.setVec3("light.position", lampPosition);
+			ourShader.setVec3("light.direction", mainCamera.Front);
+		}
+		else
+		{
+			//glm::vec3 lampPos = glm::vec3(1.2f, 1.0f, 2.0f);
+			//lampPosition = lampPos;
+			//ourShader.setVec3("light.position", lampPos);
+		}
+
 		ourShader.setFloat("time", currentTime);
 
 		for (int i = 0; i < 10; i++)
@@ -282,7 +310,8 @@ int main()
 		lightShader.setMat4("projection", projection);
 		lightShader.setMat4("model", model);
 
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		if (!lightFollowCamera)
+			glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		time2 = glfwGetTime();
 		renderTime = time2 - time1;
@@ -375,4 +404,18 @@ unsigned int loadTexture(const char* path)
 	stbi_image_free(data);
 
 	return textureID;
+}
+
+bool switchDisplayWireframe()
+{
+	static bool displayWireframe = false;
+
+	// switch frame/texture display
+	if (displayWireframe)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	displayWireframe = !displayWireframe;
+
+	return displayWireframe;
 }
