@@ -137,27 +137,13 @@ static void mousebtn_callback(GLFWwindow * window, int button, int action, int m
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	Event ev;
-	ev.type = Event::KeyPressed;
+	ev.type = action == GLFW_PRESS ? Event::KeyPressed : Event::KeyReleased;
 	ev.key.code = (Keyboard::Key)key;
 	ev.key.shift = GLFW_MOD_SHIFT & mods;
 	ev.key.control = GLFW_MOD_CONTROL & mods;
 	ev.key.alt = GLFW_MOD_ALT & mods;
 	ev.key.system = GLFW_MOD_SUPER & mods;
 	Window::activeWindow->_events.push(ev);
-
-	static bool displayWireframe = false;
-	// close window
-	//if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		//glfwSetWindowShouldClose(window, true);
-	// switch frame/texture display
-	if (key == GLFW_KEY_F && action == GLFW_PRESS)
-	{
-		if (displayWireframe)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		else
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		displayWireframe = !displayWireframe;
-	}
 }
 // ------------------------------------------------------------------------------------------
 }
