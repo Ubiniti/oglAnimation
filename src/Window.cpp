@@ -46,6 +46,8 @@ Window::Window(int width, int height, const char* title)
 
 	activeGlfwWindow = glfwWindow;
 	activeWindow = this;
+
+	glEnable(GL_DEPTH_TEST);
 }
 // ------------------------------------------------------------------------------------------
 Window::~Window()
@@ -72,6 +74,7 @@ void Window::close()
 // ------------------------------------------------------------------------------------------
 void Window::display()
 {
+	glfwPollEvents();
 	glfwSwapBuffers(glfwWindow);
 }
 // ------------------------------------------------------------------------------------------

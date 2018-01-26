@@ -72,8 +72,7 @@ public:
 	void ProcessMouseMovement(float xoffset, float yoffset)
 	{
 		Yaw += xoffset * Sensitivity;
-		Pitch = glm::min(Pitch - yoffset * Sensitivity, 89.0f);
-
+		Pitch = glm::max(glm::min(Pitch - yoffset * Sensitivity, 89.0f), -89.0f);
 		Front.x = cos(glm::radians(Pitch)) * cos(glm::radians(Yaw));
 		Front.y = sin(glm::radians(Pitch));
 		Front.z = cos(glm::radians(Pitch)) * sin(glm::radians(Yaw));
