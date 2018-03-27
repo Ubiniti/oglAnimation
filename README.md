@@ -9,8 +9,6 @@ Features:
   - Window and Shader abstraction
   - Scene loading from JSON
 
-Project code compiles under VS 2017, but it lacks of some 3d models for legal reasons.
-
 Libraries used:
   - [GLFW](http://www.glfw.org/)  for OpenGL window context
   - [GLM](glm.g-truc.net/) for maths
