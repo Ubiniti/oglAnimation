@@ -1,0 +1,91 @@
+{
+	"dirLight" : {
+		"direction" : [0.0, -1.0, -1.0],
+		"ambient" : [0.15, 0.15, 0.15],
+		"diffuse" : [1.0, 1.0, 1.0],
+		"specular" : [1.0, 1.0, 1.0],
+		"strength" : 1.0
+	},
+	
+	"pointLights" : 
+	[
+		{
+			"position" : [1.5, 0.8, 0.8],
+			"ambient" : [0.2, 0.2, 0.2],
+			"diffuse" : [1.0, 1.0, 1.0],
+			"specular" : [1.0, 1.0, 1.0],
+			"strength" : 1.0,
+			"constant" : 1.0,
+			"liniear" : 0.33,
+			"quadratic" : 0.33
+		},
+		{
+			"position" : [4.0, 0.5, 1.0],
+			"ambient" : [0.2, 0.2, 0.2],
+			"diffuse" : [1.0, 1.0, 1.0],
+			"specular" : [1.0, 1.0, 1.0],
+			"strength" : 1.0,
+			"constant" : 1.0,
+			"liniear" : 0.33,
+			"quadratic" : 0.33
+		},
+		{
+			"position" : [0.0, 1.3, 1.0],
+			"ambient" : [0.2, 0.2, 0.2],
+			"diffuse" : [1.0, 1.0, 1.0],
+			"specular" : [1.0, 1.0, 1.0],
+			"strength" : 1.0,
+			"constant" : 1.0,
+			"liniear" : 0.33,
+			"quadratic" : 0.33
+		}
+	],
+	
+	"lampModel" : {
+		"color" : [249, 248, 172],
+		"scale" : [0.1, 0.1, 0.1],
+		"rotation" : [-90.0, 0.0, 0.0],
+		"modelPath" : "res/models/lamp.stl"
+	},
+
+	"model0" : {
+		"rotation" : [-90.0, 0.0, -10.0],
+		"scale" : [1.0, 1.0, 1.0],
+		"color" : [122, 112, 77],
+		"modelPath" : "res/models/logo/logo_0.ply"
+	},
+	"model1" : {
+		"rotation" : [-90.0, 0.0, -10.0],
+		"scale" : [1.0, 1.0, 1.0],
+		"color" : [119, 64, 183],
+		"modelPath" : "res/models/logo/logo_1.ply"
+	},
+	
+	"models" :
+	[
+		{
+			"position" : [3.5, 0.0, -0.1],
+			"rotation" : [-90.0, 0.0, -10.0],
+			"scale" : [1.0, 1.0, 1.0],
+			"color" : [255, 255, 255],
+			"modelPath" : "res/models/logo/komp.fbx",
+			"texturePath" : "res/models/logo/komp.png"
+		},
+		{
+			"position" : [0.0, 0.0, 0.0],
+			"rotation" : [-90.0, 0.0, 0.0],
+			"scale" : [1.0, 1.0, 1.0],
+			"color" : [140, 65, 44],
+			"modelPath" : "res/models/logo/logo_i.fbx",
+			"texturePath" : ""
+		},
+		{
+			"position" : [0.0, 0.0, 0.0],
+			"rotation" : [-90.0, 0.0, 0.0],
+			"scale" : [1.0, 1.0, 1.0],
+			"color" : [122, 112, 77],
+			"modelPath" : "res/models/logo/napis.ply",
+			"texturePath" : ""
+		}
+	]
+}
